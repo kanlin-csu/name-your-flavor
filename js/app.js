@@ -2,6 +2,7 @@ import { normalizeName } from "./dictionary.js";
 import { hashName } from "./hash.js";
 import { matchName } from "./matcher.js";
 import { ALLERGENS } from "./foods.js";
+import { createResultImage } from "./result-image.js";
 
 const form = document.querySelector("#match-form");
 const nameInput = document.querySelector("#name-input");
@@ -10,6 +11,8 @@ const results = document.querySelector("#results");
 const dietSelect = document.querySelector("#diet-select");
 const spicySelect = document.querySelector("#spicy-select");
 const removeTitles = document.querySelector("#remove-titles");
+let currentResult = null;
+let currentStory = "";
 const cuisineNames = {
   taiwanese: "台灣風味", japanese: "日本風味", korean: "韓國風味", thai: "泰式風味",
   chinese: "中華風味", italian: "義式風味", southeastAsian: "東南亞風味",
@@ -89,10 +92,15 @@ function buildStory(name, hits, food, storyIndex) {
 
 function renderResult(result, preferences) {
   const food = result.featured;
+  currentResult = result;
+  currentStory = buildStory(result.normalizedName, result.hits, food, result.storyIndex);
   setText("#result-title", `${result.normalizedName}的代表美食`);
   setText("#hero-food-name", food.name);
   setText("#hero-food-description", food.description);
-  setText("#story-text", buildStory(result.normalizedName, result.hits, food, result.storyIndex));
+  setText("#story-text", currentStory);
+  setText("#food-ingredients", food.ingredients.join("、"));
+  setText("#food-flavor-note", food.flavorNote);
+  setText("#food-occasion", food.occasionNote);
   const visual = document.querySelector("#hero-food-visual");
   visual.setAttribute("aria-label", `${food.name}，食物插圖`);
   setText("#hero-food-emoji", food.emoji);
@@ -185,6 +193,36 @@ async function shareResult() {
   }
 }
 
+async function saveResultImage() {
+  const status = document.querySelector("#share-status");
+  const button = document.querySelector("#save-image-button");
+  if (!currentResult) {
+    status.textContent = "請先完成美食配對，再儲存結果圖片。";
+    return;
+  }
+  button.disabled = true;
+  status.textContent = "正在製作你的美食配對圖片…";
+  try {
+    const image = await createResultImage(currentResult, currentStory);
+    const objectUrl = URL.createObjectURL(image);
+    const link = document.createElement("a");
+    const safeName = currentResult.normalizedName.replace(/[^\p{L}\p{N}-]/gu, "").slice(0, 20) || "flavor";
+    link.href = objectUrl;
+    link.download = `${safeName}-name-your-flavor.png`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    status.textContent = "結果圖片已準備下載。";
+  } catch (error) {
+    status.textContent = error.message === "canvas-unavailable" || error.message === "image-export-unavailable"
+      ? "這個瀏覽器暫不支援圖片匯出，請更新瀏覽器後再試。"
+      : "圖片製作失敗，請再試一次。";
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function restoreFromUrl() {
   const params = new URLSearchParams(window.location.search);
   if (!params.has("name")) return;
@@ -220,6 +258,7 @@ document.querySelector("#reset-button").addEventListener("click", () => {
   document.querySelector("#match-form").scrollIntoView({ behavior: "smooth", block: "center" });
 });
 document.querySelector("#share-button").addEventListener("click", shareResult);
+document.querySelector("#save-image-button").addEventListener("click", saveResultImage);
 document.querySelectorAll(".example-button").forEach((button) => {
   button.addEventListener("click", () => {
     nameInput.value = button.dataset.example;

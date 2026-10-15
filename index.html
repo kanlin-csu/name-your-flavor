@@ -100,6 +100,14 @@
           <div id="trait-list" class="trait-list"></div>
         </div>
       </article>
+      <section class="food-notes" aria-labelledby="food-notes-title">
+        <div class="section-title"><div><p class="eyebrow">A CLOSER LOOK</p><h3 id="food-notes-title">這道料理的風味筆記</h3></div></div>
+        <div class="food-note-grid">
+          <article class="food-note"><span class="note-icon" aria-hidden="true">✳</span><div><h4>食材線索</h4><p id="food-ingredients"></p></div></article>
+          <article class="food-note"><span class="note-icon" aria-hidden="true">◌</span><div><h4>風味印象</h4><p id="food-flavor-note"></p></div></article>
+          <article class="food-note"><span class="note-icon" aria-hidden="true">⌂</span><div><h4>適合時刻</h4><p id="food-occasion"></p></div></article>
+        </div>
+      </section>
       <div class="result-columns">
         <section class="recommendations" aria-labelledby="recommendation-title">
           <div class="section-title"><div><p class="eyebrow">A FEW MORE TO TRY</p><h3 id="recommendation-title">也很適合你的味道</h3></div><span class="small-count">01 — 04</span></div>
@@ -112,7 +120,10 @@
       </div>
       <div class="share-bar">
         <div><strong>喜歡這次的配對嗎？</strong><span>把你的名字味道分享出去。</span></div>
-        <button id="share-button" class="share-button" type="button">分享我的結果 <span aria-hidden="true">↗</span></button>
+        <div class="share-actions">
+          <button id="save-image-button" class="save-button" type="button">儲存結果圖片 <span aria-hidden="true">↓</span></button>
+          <button id="share-button" class="share-button" type="button">分享我的結果 <span aria-hidden="true">↗</span></button>
+        </div>
         <p id="share-status" role="status" class="share-status"></p>
       </div>
     </section>

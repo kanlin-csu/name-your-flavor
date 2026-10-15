@@ -3,6 +3,7 @@ import { NAME_DICTIONARY, normalizeName, findNameMatches } from "../js/dictionar
 import { FOODS, ALLERGENS } from "../js/foods.js";
 import { hashName } from "../js/hash.js";
 import { matchName } from "../js/matcher.js";
+import { drawResultCard } from "../js/result-image.js";
 
 const tests = [];
 function test(name, run) {
@@ -50,11 +51,12 @@ test("filters diet, allergens, and spice without changing the name hash", () => 
 });
 
 test("food and dictionary data meet the delivery requirements", () => {
-  assert.ok(FOODS.length >= 80, `expected at least 80 foods, got ${FOODS.length}`);
+  assert.ok(FOODS.length >= 120, `expected at least 120 foods, got ${FOODS.length}`);
   assert.ok(new Set(FOODS.map((food) => food.id)).size === FOODS.length);
-  assert.ok(new Set(NAME_DICTIONARY.flatMap((entry) => entry.match)).size >= 100);
+  assert.ok(new Set(NAME_DICTIONARY.flatMap((entry) => entry.match)).size >= 200);
   for (const food of FOODS) {
     assert.ok(food.name && food.description && food.emoji);
+    assert.ok(food.flavorNote && food.occasionNote);
     assert.ok(["vegan", "vegetarian", "omnivore"].includes(food.diet), `${food.id} has an invalid diet`);
     assert.ok(Number.isInteger(food.spicy) && food.spicy >= 0 && food.spicy <= 2, `${food.id} has an invalid spice level`);
     assert.ok(food.allergens.every((allergen) => ALLERGENS.includes(allergen)), `${food.id} has an unknown allergen`);
@@ -78,6 +80,29 @@ test("result has four unique, category-diverse recommendations", () => {
   assert.equal(result.recommendations.length, 4);
   assert.equal(new Set(result.recommendations.map((food) => food.id)).size, 4);
   assert.ok(new Set(result.recommendations.map((food) => food.category)).size > 1);
+});
+
+test("saved image rendering includes the name, featured dish, and recommendations", () => {
+  const renderedText = [];
+  const context = {
+    clearRect() {},
+    fillRect() {},
+    beginPath() {},
+    arc() {},
+    fill() {},
+    roundRect() {},
+    moveTo() {},
+    lineTo() {},
+    stroke() {},
+    measureText(text) { return { width: Array.from(text).length * 20 }; },
+    fillText(text) { renderedText.push(text); },
+    createLinearGradient() { return { addColorStop() {} }; }
+  };
+  const result = matchName("甘霖", hashName("甘霖"));
+  drawResultCard(context, result, "甘甜而溫柔的故事");
+  for (const text of ["甘霖的味道", result.featured.name, ...result.recommendations.map((food) => food.name)]) {
+    assert.ok(renderedText.includes(text), `image is missing ${text}`);
+  }
 });
 
 test("HTML-like input is handled as data and length-limited", () => {

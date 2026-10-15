@@ -5,7 +5,7 @@ import { stableTieScore } from "./hash.js";
 const TASTE_KEYS = ["sweet", "sour", "spicy", "savory", "bitter", "light"];
 const TEXTURE_KEYS = ["crispy", "soft", "chewy", "smooth", "juicy"];
 const METHOD_KEYS = ["grill", "fry", "steam", "stew", "raw", "bake"];
-const CUISINE_KEYS = ["taiwanese", "japanese", "korean", "thai", "chinese", "italian", "southeastAsian", "dessert", "western", "indian"];
+const CUISINE_KEYS = ["taiwanese", "japanese", "korean", "thai", "chinese", "italian", "southeastAsian", "dessert", "western", "indian", "middleEastern", "mediterranean"];
 const TASTE_NAMES = { sweet: "甜潤", sour: "酸香", spicy: "辛香", savory: "鮮醇", bitter: "回甘", light: "清爽" };
 const TEXTURE_NAMES = { crispy: "酥脆", soft: "綿密", chewy: "Q彈", smooth: "滑順", juicy: "多汁" };
 const METHOD_NAMES = { grill: "炙烤", fry: "酥炸", steam: "蒸煮", stew: "慢燉", raw: "清新呈現", bake: "烘焙" };
