@@ -1,0 +1,127 @@
+const tasteProfiles = {
+  sweet: { sweet: 5, sour: 0, spicy: 0, savory: 1, bitter: 0, light: 2 },
+  light: { sweet: 2, sour: 1, spicy: 0, savory: 2, bitter: 1, light: 5 },
+  savory: { sweet: 0, sour: 0, spicy: 1, savory: 5, bitter: 0, light: 1 },
+  spicy: { sweet: 0, sour: 1, spicy: 5, savory: 4, bitter: 0, light: 0 },
+  sour: { sweet: 1, sour: 5, spicy: 1, savory: 2, bitter: 0, light: 3 },
+  umami: { sweet: 1, sour: 0, spicy: 0, savory: 5, bitter: 1, light: 3 },
+  balanced: { sweet: 2, sour: 1, spicy: 1, savory: 3, bitter: 0, light: 3 }
+};
+const textureProfiles = {
+  soft: { crispy: 0, soft: 5, chewy: 1, smooth: 3, juicy: 2 },
+  smooth: { crispy: 0, soft: 2, chewy: 0, smooth: 5, juicy: 3 },
+  crispy: { crispy: 5, soft: 1, chewy: 1, smooth: 0, juicy: 1 },
+  chewy: { crispy: 1, soft: 2, chewy: 5, smooth: 1, juicy: 1 },
+  juicy: { crispy: 1, soft: 2, chewy: 1, smooth: 2, juicy: 5 },
+  mixed: { crispy: 2, soft: 3, chewy: 2, smooth: 2, juicy: 2 }
+};
+const methodLabels = { grill: "炙烤", fry: "酥炸", steam: "蒸煮", stew: "燉煮", raw: "生食", bake: "烘焙" };
+const cuisineLabels = {
+  taiwanese: "台灣", japanese: "日本", korean: "韓國", thai: "泰式",
+  chinese: "中華", italian: "義式", southeastAsian: "東南亞", dessert: "甜點"
+};
+
+const rows = [
+  ["osmanthus-taro", "桂花蜜芋頭", "🍠", "taiwanese", "甜點", "sweet", "soft", "stew", "芋頭,桂花,蜂蜜", "", "vegetarian", 0],
+  ["fermented-rice-tangyuan", "酒釀湯圓", "🍡", "chinese", "甜點", "sweet", "soft", "stew", "糯米,酒釀,桂花", "", "vegan", 0],
+  ["honey-pancake", "蜂蜜鬆餅", "🥞", "western", "早餐", "sweet", "soft", "bake", "麵粉,蜂蜜,牛奶,蛋", "milk,eggs", "vegetarian", 0],
+  ["red-bean-soup", "紅豆湯", "🍵", "taiwanese", "甜點", "sweet", "soft", "stew", "紅豆,冰糖", "", "vegan", 0],
+  ["matcha-parfait", "抹茶紅豆聖代", "🍨", "japanese", "甜點", "sweet", "smooth", "raw", "抹茶,紅豆,牛奶", "milk", "vegetarian", 0],
+  ["mango-sago", "楊枝甘露", "🥭", "southeastAsian", "甜點", "sweet", "smooth", "raw", "芒果,柚子,椰奶", "", "vegan", 0],
+  ["tofu-pudding", "花生豆花", "🥣", "taiwanese", "甜點", "sweet", "smooth", "stew", "豆花,花生,糖水", "peanuts", "vegan", 0],
+  ["sesame-tangyuan", "芝麻湯圓", "⚫", "chinese", "甜點", "sweet", "soft", "stew", "糯米,芝麻,糖", "", "vegan", 0],
+  ["pineapple-cake", "鳳梨酥", "🍍", "taiwanese", "點心", "sweet", "crispy", "bake", "鳳梨,麵粉,奶油", "milk", "vegetarian", 0],
+  ["grass-jelly", "仙草蜜", "🧋", "taiwanese", "飲品", "sweet", "smooth", "stew", "仙草,蜂蜜,檸檬", "", "vegan", 0],
+  ["lemon-tart", "檸檬塔", "🍋", "italian", "甜點", "sour", "crispy", "bake", "檸檬,麵粉,奶油,蛋", "milk,eggs", "vegetarian", 0],
+  ["strawberry-cake", "草莓鮮奶油蛋糕", "🍰", "italian", "甜點", "sweet", "soft", "bake", "草莓,麵粉,牛奶,蛋", "milk,eggs", "vegetarian", 0],
+  ["sweet-potato-balls", "地瓜球", "🟠", "taiwanese", "小吃", "sweet", "chewy", "fry", "地瓜,樹薯粉", "", "vegan", 0],
+  ["brown-sugar-boba", "黑糖珍珠鮮奶", "🧋", "taiwanese", "飲品", "sweet", "chewy", "stew", "珍珠,黑糖,牛奶", "milk", "vegetarian", 0],
+  ["mango-shaved-ice", "芒果刨冰", "🍧", "taiwanese", "甜點", "sweet", "smooth", "raw", "芒果,冰,煉乳", "milk", "vegetarian", 0],
+  ["castella", "蜂蜜長崎蛋糕", "🍰", "japanese", "點心", "sweet", "soft", "bake", "蜂蜜,麵粉,蛋", "eggs", "vegetarian", 0],
+  ["soy-milk", "無糖豆漿", "🥛", "taiwanese", "飲品", "light", "smooth", "steam", "黃豆,水", "", "vegan", 0],
+  ["green-tea", "冷泡綠茶", "🍵", "japanese", "飲品", "light", "smooth", "raw", "綠茶,水", "", "vegan", 0],
+  ["citrus-salad", "柚香時蔬沙拉", "🥗", "italian", "素食", "light", "crispy", "raw", "柚子,生菜,番茄", "", "vegan", 0],
+  ["soba", "山葵蕎麥冷麵", "🍜", "japanese", "麵飯", "light", "chewy", "raw", "蕎麥,海苔,山葵", "", "vegan", 1],
+  ["miso-soup", "豆腐海帶味噌湯", "🍲", "japanese", "湯品", "light", "soft", "stew", "豆腐,海帶,味噌", "", "vegan", 0],
+  ["tomato-egg", "番茄炒蛋", "🍅", "chinese", "家常", "balanced", "juicy", "fry", "番茄,蛋,蔥", "eggs", "vegetarian", 0],
+  ["fruit-yogurt", "蜂蜜水果優格", "🍓", "western", "早餐", "light", "smooth", "raw", "優格,莓果,蜂蜜", "milk", "vegetarian", 0],
+  ["avocado-toast", "酪梨酸種吐司", "🥑", "western", "早餐", "light", "crispy", "bake", "酪梨,麵包,檸檬", "wheat", "vegan", 0],
+  ["iced-americano", "冰美式咖啡", "☕", "western", "飲品", "light", "smooth", "raw", "咖啡,水", "", "vegan", 0],
+  ["winter-melon-tea", "冬瓜檸檬茶", "🍹", "taiwanese", "飲品", "light", "smooth", "stew", "冬瓜,檸檬,茶", "", "vegan", 0],
+  ["steamed-vegetables", "蒜香蒸時蔬", "🥦", "taiwanese", "素食", "light", "soft", "steam", "青花菜,蒜,橄欖油", "", "vegan", 0],
+  ["seaweed-riceball", "梅香海苔飯糰", "🍙", "japanese", "早餐", "balanced", "chewy", "steam", "米,梅子,海苔", "", "vegan", 0],
+  ["chicken-soup", "清燉雞湯", "🍲", "taiwanese", "湯品", "umami", "soft", "stew", "雞肉,白蘿蔔,薑", "", "omnivore", 0],
+  ["oden", "日式關東煮", "🍢", "japanese", "小吃", "umami", "soft", "stew", "白蘿蔔,蒟蒻,昆布", "", "vegan", 0],
+  ["beef-noodles", "紅燒牛肉麵", "🍜", "taiwanese", "麵飯", "savory", "chewy", "stew", "牛肉,麵,番茄", "wheat", "omnivore", 1],
+  ["pork-rice", "滷肉飯", "🍚", "taiwanese", "麵飯", "savory", "soft", "stew", "豬肉,米,油蔥", "", "omnivore", 0],
+  ["chicken-rice", "海南雞飯", "🍗", "southeastAsian", "麵飯", "umami", "soft", "steam", "雞肉,米,薑", "", "omnivore", 0],
+  ["kimchi-stew", "韓式泡菜豆腐鍋", "🍲", "korean", "湯品", "spicy", "soft", "stew", "泡菜,豆腐,菇類", "", "vegan", 2],
+  ["bibimbap", "韓式蔬菜拌飯", "🍚", "korean", "麵飯", "balanced", "mixed", "fry", "米,菠菜,豆芽,蛋", "eggs", "vegetarian", 1],
+  ["pad-thai", "泰式炒河粉", "🍜", "thai", "麵飯", "sour", "chewy", "fry", "米粉,豆芽,花生,檸檬", "peanuts", "vegan", 1],
+  ["tom-yum", "冬蔭功湯", "🍲", "thai", "湯品", "sour", "juicy", "stew", "蝦,香茅,檸檬", "shellfish", "omnivore", 2],
+  ["margherita", "瑪格麗特披薩", "🍕", "italian", "主食", "savory", "crispy", "bake", "番茄,起司,羅勒,麵粉", "milk,wheat", "vegetarian", 0],
+  ["mushroom-risotto", "野菇燉飯", "🍚", "italian", "麵飯", "umami", "smooth", "stew", "米,蘑菇,起司", "milk", "vegetarian", 0],
+  ["caprese", "番茄莫札瑞拉沙拉", "🍅", "italian", "素食", "light", "juicy", "raw", "番茄,起司,羅勒", "milk", "vegetarian", 0],
+  ["fried-rice", "香菇蔬菜炒飯", "🍳", "chinese", "麵飯", "savory", "mixed", "fry", "米,香菇,青菜,醬油", "soy", "vegan", 0],
+  ["mapo-tofu", "麻婆豆腐", "🌶️", "chinese", "家常", "spicy", "soft", "stew", "豆腐,豆瓣醬,花椒", "soy", "vegan", 2],
+  ["scallion-pancake", "蔥油餅", "🥞", "taiwanese", "小吃", "savory", "crispy", "fry", "麵粉,青蔥,芝麻油", "wheat", "vegan", 0],
+  ["xiaolongbao", "鮮肉小籠包", "🥟", "chinese", "小吃", "umami", "juicy", "steam", "豬肉,麵粉,薑", "wheat", "omnivore", 0],
+  ["turnip-cake", "蘿蔔糕", "🍘", "taiwanese", "早餐", "savory", "soft", "fry", "白蘿蔔,米粉,香菇", "", "vegan", 0],
+  ["congee", "香菇蔬菜粥", "🥣", "chinese", "早餐", "light", "soft", "stew", "米,香菇,青菜", "", "vegan", 0],
+  ["sushi", "鮭魚握壽司", "🍣", "japanese", "主食", "umami", "soft", "raw", "鮭魚,米,醋", "fish", "omnivore", 0],
+  ["tempura", "野菜天婦羅", "🍤", "japanese", "小吃", "savory", "crispy", "fry", "南瓜,茄子,麵粉", "wheat", "vegan", 0],
+  ["ramen", "柚香鹽味拉麵", "🍜", "japanese", "麵飯", "umami", "chewy", "stew", "麵,昆布,柚子,雞湯", "wheat", "omnivore", 0],
+  ["onigiri", "鮭魚飯糰", "🍙", "japanese", "小吃", "savory", "chewy", "steam", "米,鮭魚,海苔", "fish", "omnivore", 0],
+  ["yakitori", "炭火雞肉串", "🍢", "japanese", "小吃", "savory", "juicy", "grill", "雞肉,醬油,蔥", "soy", "omnivore", 0],
+  ["bulgogi", "韓式烤牛肉", "🥩", "korean", "主食", "savory", "juicy", "grill", "牛肉,梨,芝麻,醬油", "sesame,soy", "omnivore", 0],
+  ["kimbap", "田園蔬菜紫菜飯卷", "🍙", "korean", "小吃", "balanced", "chewy", "raw", "米,海苔,菠菜,紅蘿蔔", "", "vegan", 0],
+  ["tteokbokki", "韓式辣炒年糕", "🌶️", "korean", "小吃", "spicy", "chewy", "stew", "年糕,辣椒醬,高麗菜", "", "vegan", 2],
+  ["spring-roll", "越式鮮蔬春捲", "🥬", "southeastAsian", "小吃", "light", "crispy", "raw", "米紙,生菜,薄荷,豆腐", "", "vegan", 0],
+  ["green-curry", "泰式綠咖哩蔬菜", "🍛", "thai", "主食", "spicy", "smooth", "stew", "椰奶,茄子,九層塔", "", "vegan", 2],
+  ["satay", "沙嗲雞肉串", "🍢", "southeastAsian", "小吃", "savory", "juicy", "grill", "雞肉,花生,香茅", "peanuts", "omnivore", 1],
+  ["laksa", "叻沙米線", "🍜", "southeastAsian", "麵飯", "spicy", "smooth", "stew", "米線,椰奶,蝦", "shellfish", "omnivore", 2],
+  ["dumpling", "高麗菜水餃", "🥟", "chinese", "主食", "savory", "soft", "steam", "高麗菜,麵粉,豆腐", "wheat", "vegan", 0],
+  ["wonton-soup", "鮮蔬餛飩湯", "🥣", "chinese", "湯品", "umami", "smooth", "stew", "餛飩,青菜,香菇", "wheat", "vegan", 0],
+  ["hotpot", "昆布蔬菜鍋", "🍲", "taiwanese", "湯品", "light", "soft", "stew", "昆布,白菜,豆腐,菇類", "", "vegan", 0],
+  ["grilled-corn", "炭烤玉米", "🌽", "taiwanese", "小吃", "sweet", "crispy", "grill", "玉米,醬油,香料", "soy", "vegan", 0],
+  ["scallion-noodles", "麻油拌麵線", "🍜", "taiwanese", "麵飯", "savory", "smooth", "steam", "麵線,麻油,薑", "wheat", "vegan", 0],
+  ["stewed-daikon", "醬燒白蘿蔔", "🍲", "japanese", "素食", "umami", "soft", "stew", "白蘿蔔,昆布,醬油", "soy", "vegan", 0],
+  ["pumpkin-soup", "南瓜濃湯", "🥣", "western", "湯品", "sweet", "smooth", "stew", "南瓜,馬鈴薯,牛奶", "milk", "vegetarian", 0],
+  ["mushroom-soup", "奶油蘑菇湯", "🍄", "western", "湯品", "umami", "smooth", "stew", "蘑菇,牛奶,奶油", "milk", "vegetarian", 0],
+  ["french-toast", "肉桂法式吐司", "🍞", "western", "早餐", "sweet", "soft", "fry", "吐司,蛋,牛奶,肉桂", "wheat,milk,eggs", "vegetarian", 0],
+  ["granola", "莓果燕麥碗", "🫐", "western", "早餐", "light", "crispy", "bake", "燕麥,莓果,堅果", "tree-nuts", "vegan", 0],
+  ["croissant", "奶油可頌", "🥐", "western", "早餐", "savory", "crispy", "bake", "麵粉,奶油", "wheat,milk", "vegetarian", 0],
+  ["chocolate-mousse", "絲絨巧克力慕斯", "🍫", "western", "甜點", "sweet", "smooth", "raw", "巧克力,鮮奶油,蛋", "milk,eggs", "vegetarian", 0],
+  ["lemon-sorbet", "檸檬雪酪", "🍋", "italian", "甜點", "sour", "smooth", "raw", "檸檬,糖,水", "", "vegan", 0],
+  ["tiramisu", "提拉米蘇", "🍰", "italian", "甜點", "sweet", "smooth", "raw", "咖啡,馬斯卡彭,蛋", "milk,eggs", "vegetarian", 0],
+  ["mochi", "抹茶大福", "🍵", "japanese", "甜點", "sweet", "chewy", "steam", "糯米,紅豆,抹茶", "", "vegan", 0],
+  ["dorayaki", "紅豆銅鑼燒", "🥮", "japanese", "點心", "sweet", "soft", "bake", "紅豆,麵粉,蛋", "wheat,eggs", "vegetarian", 0],
+  ["lemonade", "蜂蜜檸檬氣泡飲", "🍋", "western", "飲品", "sour", "juicy", "raw", "檸檬,蜂蜜,氣泡水", "", "vegan", 0],
+  ["mango-smoothie", "芒果椰奶冰沙", "🥭", "southeastAsian", "飲品", "sweet", "smooth", "raw", "芒果,椰奶,香蕉", "", "vegan", 0],
+  ["chrysanthemum-tea", "菊花枸杞茶", "🌼", "chinese", "飲品", "light", "smooth", "stew", "菊花,枸杞,水", "", "vegan", 0],
+  ["salt-pepper-mushroom", "椒鹽杏鮑菇", "🍄", "taiwanese", "小吃", "savory", "crispy", "fry", "杏鮑菇,胡椒,九層塔", "", "vegan", 1],
+  ["roasted-sweet-potato", "炙烤地瓜", "🍠", "taiwanese", "點心", "sweet", "soft", "grill", "地瓜", "", "vegan", 0],
+  ["lotus-root-salad", "梅醋蓮藕沙拉", "🥗", "chinese", "素食", "sour", "crispy", "raw", "蓮藕,梅子,芝麻", "sesame", "vegan", 0],
+  ["grilled-salmon", "味噌烤鮭魚", "🐟", "japanese", "主食", "umami", "juicy", "grill", "鮭魚,味噌,檸檬", "fish,soy", "omnivore", 0],
+  ["chicken-sandwich", "香草烤雞三明治", "🥪", "western", "早餐", "savory", "crispy", "grill", "雞肉,麵包,生菜", "wheat", "omnivore", 0],
+  ["vegetable-curry", "椰香蔬菜咖哩", "🍛", "indian", "主食", "spicy", "smooth", "stew", "馬鈴薯,紅蘿蔔,椰奶", "", "vegan", 1],
+  ["rice-noodle-soup", "清湯米粉", "🍜", "taiwanese", "麵飯", "light", "smooth", "stew", "米粉,芹菜,香菇", "", "vegan", 0],
+  ["edamame", "海鹽毛豆", "🫛", "japanese", "小吃", "savory", "chewy", "steam", "毛豆,海鹽", "soy", "vegan", 0]
+];
+
+const parseList = (value) => value ? value.split(",") : [];
+export const FOODS = rows.map(([id, name, emoji, cuisine, category, taste, texture, method, ingredients, allergens, diet, spicy]) => ({
+  id, name, emoji, image: null, imageAlt: name,
+  description: `${parseList(ingredients).join("、")}，以${methodLabels[method]}方式呈現的${cuisineLabels[cuisine] || cuisine}風味。`,
+  cuisines: [cuisine], category, tastes: { ...tasteProfiles[taste] },
+  textures: { ...textureProfiles[texture] }, methods: [method],
+  ingredients: parseList(ingredients), occasions: ["sharing", "everyday"],
+  diet, allergens: parseList(allergens), spicy,
+  storyTemplates: [
+    `這道料理的${parseList(ingredients).slice(0, 2).join("與")}，讓味道在${methodLabels[method]}之間慢慢展開。`,
+    `從${parseList(ingredients)[0]}開始，清楚而舒服的層次，正適合留一點時間細細品味。`
+  ]
+}));
+
+export const FOOD_CATEGORIES = ["台灣料理", "日本料理", "韓國料理", "東南亞料理", "中華料理", "義大利料理", "早餐", "小吃", "湯品", "麵飯", "甜點", "飲品", "素食"];
+export const ALLERGENS = ["peanuts", "tree-nuts", "milk", "eggs", "shellfish", "wheat", "soy", "sesame", "fish"];

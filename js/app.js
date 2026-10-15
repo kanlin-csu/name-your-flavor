@@ -1,0 +1,230 @@
+import { normalizeName } from "./dictionary.js";
+import { hashName } from "./hash.js";
+import { matchName } from "./matcher.js";
+import { ALLERGENS } from "./foods.js";
+
+const form = document.querySelector("#match-form");
+const nameInput = document.querySelector("#name-input");
+const errorMessage = document.querySelector("#form-error");
+const results = document.querySelector("#results");
+const dietSelect = document.querySelector("#diet-select");
+const spicySelect = document.querySelector("#spicy-select");
+const removeTitles = document.querySelector("#remove-titles");
+const cuisineNames = {
+  taiwanese: "台灣風味", japanese: "日本風味", korean: "韓國風味", thai: "泰式風味",
+  chinese: "中華風味", italian: "義式風味", southeastAsian: "東南亞風味",
+  dessert: "甜點", western: "西式風味", indian: "印度風味"
+};
+
+function setText(selector, value) {
+  document.querySelector(selector).textContent = value;
+}
+
+function showError(message) {
+  errorMessage.textContent = message;
+  errorMessage.hidden = false;
+  nameInput.setAttribute("aria-invalid", "true");
+}
+
+function clearError() {
+  errorMessage.textContent = "";
+  errorMessage.hidden = true;
+  nameInput.removeAttribute("aria-invalid");
+}
+
+function readPreferences() {
+  return {
+    diet: dietSelect.value,
+    spicy: spicySelect.value,
+    allergens: Array.from(form.querySelectorAll('input[name="allergen"]:checked'), (input) => input.value)
+      .filter((allergen) => ALLERGENS.includes(allergen))
+  };
+}
+
+function makeTag(label, value) {
+  const tag = document.createElement("span");
+  tag.className = "trait-tag";
+  const strong = document.createElement("strong");
+  strong.textContent = `${label}：`;
+  tag.append(strong, document.createTextNode(value));
+  return tag;
+}
+
+function renderRecommendations(foods) {
+  const list = document.querySelector("#recommendation-list");
+  list.replaceChildren();
+  foods.forEach((food) => {
+    const card = document.createElement("article");
+    card.className = "recommendation-card";
+    const emoji = document.createElement("span");
+    emoji.className = "recommendation-emoji";
+    emoji.setAttribute("role", "img");
+    emoji.setAttribute("aria-label", food.imageAlt);
+    emoji.textContent = food.emoji;
+    const copy = document.createElement("div");
+    copy.className = "recommendation-copy";
+    const name = document.createElement("h4");
+    name.textContent = food.name;
+    const description = document.createElement("p");
+    description.textContent = food.description;
+    copy.append(name, description);
+    const cuisine = document.createElement("span");
+    cuisine.className = "recommendation-cuisine";
+    cuisine.textContent = cuisineNames[food.cuisines[0]] || "風味料理";
+    card.append(emoji, copy, cuisine);
+    list.append(card);
+  });
+}
+
+function buildStory(name, hits, food, storyIndex) {
+  if (name === "甘霖") {
+    return "「甘」帶來柔和的甜味，「霖」則像長雨般滋潤。\n你的代表料理適合以緩慢、溫柔的方式完成，\n味道不必強烈，卻能留下安定而細緻的印象。";
+  }
+  const clues = hits.map((hit) => `「${hit.matchedText}」帶來${hit.label}的意象`).join("，");
+  const opening = clues
+    ? `${clues}。`
+    : "這次沒有命中字典中的特定意象，料理方向由名字的固定雜湊探索而來。";
+  return `${opening}\n${food.storyTemplates[storyIndex]}`;
+}
+
+function renderResult(result, preferences) {
+  const food = result.featured;
+  setText("#result-title", `${result.normalizedName}的代表美食`);
+  setText("#hero-food-name", food.name);
+  setText("#hero-food-description", food.description);
+  setText("#story-text", buildStory(result.normalizedName, result.hits, food, result.storyIndex));
+  const visual = document.querySelector("#hero-food-visual");
+  visual.setAttribute("aria-label", `${food.name}，食物插圖`);
+  setText("#hero-food-emoji", food.emoji);
+
+  const traits = document.querySelector("#trait-list");
+  traits.replaceChildren();
+  result.traits.tastes.forEach((trait) => traits.append(makeTag("味覺", trait)));
+  result.traits.textures.forEach((trait) => traits.append(makeTag("口感", trait)));
+  const methodLabels = { grill: "炙烤", fry: "酥炸", steam: "蒸煮", stew: "慢燉", raw: "清新呈現", bake: "烘焙" };
+  const dishMethods = food.methods.map((method) => methodLabels[method] || method).join("、");
+  traits.append(makeTag("料理方式", dishMethods));
+  traits.append(makeTag("用餐情境", "午後・相聚・療癒時刻"));
+
+  renderRecommendations(result.recommendations);
+  const hitText = result.hits.length
+    ? result.hits.map((hit) => `${hit.matchedText}｜${hit.label}：${hit.description}`).join("；")
+    : "這次沒有命中字典項目；系統以姓名固定雜湊建立基礎偏好。";
+  setText("#dictionary-hits", hitText);
+  const titleNote = removeTitles.checked
+    ? "已先移除尾端稱謂，再以正規化姓名計算固定雜湊。"
+    : "稱謂保留在姓名中，並參與本次固定雜湊與配對。";
+  const preferenceNote = preferences.diet !== "any" || preferences.spicy !== "any" || preferences.allergens.length
+    ? "飲食、辣度與過敏條件只用來排除結果，不會改變姓名雜湊。"
+    : "配對以味覺相似度 30%、口感 20%、菜系 15%、料理方式 15%、食材 10% 及固定雜湊 10% 計分。";
+  setText("#method-note", `${titleNote} ${preferenceNote}`);
+
+  results.hidden = false;
+  document.querySelector("#share-status").textContent = "";
+  results.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function errorText(error) {
+  if (error.message === "empty") return "請先輸入一個名字。";
+  if (error.message === "too-long") return "名字正規化後請控制在 20 個字以內。";
+  if (error.message === "invalid") return "請輸入包含文字或數字的名字，不要只使用標點符號。";
+  if (error.message === "no-foods") return "目前沒有符合這些飲食條件的美食，請減少一項排除條件。";
+  return "配對時發生問題，請調整條件後再試一次。";
+}
+
+function submitMatch(event) {
+  event?.preventDefault();
+  clearError();
+  try {
+    const normalizedName = normalizeName(nameInput.value, { removeTitles: removeTitles.checked });
+    const hash = hashName(normalizedName);
+    const preferences = readPreferences();
+    const result = matchName(normalizedName, hash, preferences);
+    renderResult(result, preferences);
+  } catch (error) {
+    showError(errorText(error));
+    nameInput.focus();
+  }
+}
+
+async function copyUrl(url) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(url);
+    return;
+  }
+  const field = document.createElement("textarea");
+  field.value = url;
+  field.setAttribute("readonly", "");
+  field.className = "clipboard-fallback";
+  document.body.append(field);
+  field.select();
+  const copied = document.execCommand("copy");
+  field.remove();
+  if (!copied) throw new Error("clipboard-unavailable");
+}
+
+async function shareResult() {
+  const status = document.querySelector("#share-status");
+  const normalizedName = normalizeName(nameInput.value, { removeTitles: removeTitles.checked });
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.searchParams.set("name", normalizedName);
+  url.searchParams.set("diet", dietSelect.value);
+  url.searchParams.set("spicy", spicySelect.value);
+  url.searchParams.set("v", "1");
+  const shareData = { title: "名字的味道 Name Your Flavor", text: `${normalizedName}的代表美食`, url: url.href };
+  try {
+    if (navigator.share) await navigator.share(shareData);
+    else {
+      await copyUrl(url.href);
+      status.textContent = "分享網址已複製。";
+    }
+  } catch (error) {
+    if (error.name === "AbortError") return;
+    status.textContent = `無法自動複製，請手動複製網址：${url.href}`;
+  }
+}
+
+function restoreFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("name")) return;
+  const rawName = params.get("name");
+  if (rawName.length > 80 || (params.has("v") && params.get("v") !== "1")) {
+    showError("分享網址的參數無效，請重新輸入名字。");
+    return;
+  }
+  const diets = ["any", "omnivore", "lacto-ovo", "vegan"];
+  const spicyLevels = ["any", "none", "mild", "hot"];
+  const diet = params.get("diet") || "any";
+  const spicy = params.get("spicy") || "any";
+  if (!diets.includes(diet) || !spicyLevels.includes(spicy)) {
+    showError("分享網址中的偏好設定無效，請重新輸入名字。");
+    return;
+  }
+  nameInput.value = rawName;
+  dietSelect.value = diet;
+  spicySelect.value = spicy;
+  if (diet !== "any" || spicy !== "any") document.querySelector(".preferences").open = true;
+  submitMatch();
+}
+
+form.addEventListener("submit", submitMatch);
+document.querySelector("#clear-name").addEventListener("click", () => {
+  nameInput.value = "";
+  clearError();
+  nameInput.focus();
+});
+document.querySelector("#reset-button").addEventListener("click", () => {
+  results.hidden = true;
+  nameInput.focus();
+  document.querySelector("#match-form").scrollIntoView({ behavior: "smooth", block: "center" });
+});
+document.querySelector("#share-button").addEventListener("click", shareResult);
+document.querySelectorAll(".example-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    nameInput.value = button.dataset.example;
+    form.requestSubmit();
+  });
+});
+nameInput.addEventListener("input", clearError);
+restoreFromUrl();

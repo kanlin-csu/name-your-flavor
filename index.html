@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fffaf2">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="輸入名字，找出屬於你的代表美食。以文字意象與固定演算法，探索一份專屬的美食配對。">
+  <title>名字的味道 Name Your Flavor</title>
+  <script src="js/bootstrap.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <div id="runtime-notice" class="runtime-notice" role="alert" hidden></div>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="名字的味道首頁">
+      <span class="brand-mark" aria-hidden="true">味</span>
+      <span>名字的味道 <small>NAME YOUR FLAVOR</small></span>
+    </a>
+    <a class="header-link" href="#how-it-works">配對原理</a>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span aria-hidden="true">✳</span> A LITTLE TASTE OF YOU</p>
+        <h1 id="page-title">你的名字，<br><em>是什麼味道？</em></h1>
+        <p class="hero-intro">輸入名字，找出屬於你的代表美食。<br>讓文字意象，帶你遇見下一道喜歡的料理。</p>
+        <div class="hero-note"><span aria-hidden="true">✦</span> 一份從名字出發的美食小測驗</div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="art-spark spark-one">✦</span><span class="art-spark spark-two">✧</span>
+        <div class="art-plate"><span>🍜</span></div>
+        <span class="art-leaf">❧</span>
+        <p>good food<br>good mood</p>
+      </div>
+    </section>
+
+    <section class="matcher-card" aria-labelledby="form-title">
+      <div class="card-heading">
+        <div><p class="eyebrow">YOUR FLAVOR, YOUR STORY</p><h2 id="form-title">開始你的美食配對</h2></div>
+        <span class="step-mark" aria-hidden="true">01 <i>/ 02</i></span>
+      </div>
+      <form id="match-form" novalidate>
+        <label class="field-label" for="name-input">你的名字 <span>必填</span></label>
+        <div class="name-field">
+          <span aria-hidden="true">✎</span>
+          <input id="name-input" name="name" type="text" maxlength="80" autocomplete="name" placeholder="例如：甘霖老師" aria-describedby="name-help form-error">
+          <button class="clear-button" id="clear-name" type="button" aria-label="清除姓名">清除</button>
+        </div>
+        <p class="field-help" id="name-help">中文、英文、日文都可以，最多 20 個字。</p>
+        <details class="preferences">
+          <summary><span>加一點偏好設定</span><span class="optional">選填</span></summary>
+          <div class="preference-grid">
+            <div class="preference-control">
+              <label for="diet-select">飲食類型</label>
+              <select id="diet-select" name="diet">
+                <option value="any">不限</option><option value="omnivore">葷食</option><option value="lacto-ovo">蛋奶素</option><option value="vegan">純素</option>
+              </select>
+            </div>
+            <div class="preference-control">
+              <label for="spicy-select">辣度</label>
+              <select id="spicy-select" name="spicy">
+                <option value="any">不限</option><option value="none">不辣</option><option value="mild">小辣</option><option value="hot">嗜辣</option>
+              </select>
+            </div>
+            <fieldset class="allergen-control">
+              <legend>過敏原排除</legend>
+              <div class="checkbox-list">
+                <label><input type="checkbox" name="allergen" value="peanuts">花生</label>
+                <label><input type="checkbox" name="allergen" value="tree-nuts">堅果</label>
+                <label><input type="checkbox" name="allergen" value="milk">牛奶</label>
+                <label><input type="checkbox" name="allergen" value="eggs">蛋</label>
+                <label><input type="checkbox" name="allergen" value="shellfish">甲殼類</label>
+              </div>
+            </fieldset>
+            <label class="toggle-row" for="remove-titles"><input id="remove-titles" type="checkbox" checked><span class="toggle-ui" aria-hidden="true"></span><span>自動移除尾端稱謂</span></label>
+          </div>
+        </details>
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+        <button class="primary-button" type="submit">找出我的代表美食 <span aria-hidden="true">↗</span></button>
+      </form>
+      <div class="examples"><span>試試看</span><button type="button" class="example-button" data-example="甘霖老師">甘霖老師</button><button type="button" class="example-button" data-example="林嘉怡">林嘉怡</button><button type="button" class="example-button" data-example="Mika">Mika</button></div>
+      <p class="privacy-note"><span aria-hidden="true">♧</span> 你的名字只在這台裝置上運算，不會上傳或儲存。</p>
+    </section>
+
+    <section id="results" class="results" aria-live="polite" aria-atomic="false" hidden>
+      <div class="results-heading">
+        <div><p class="eyebrow">YOUR SIGNATURE DISH</p><h2 id="result-title"></h2></div>
+        <button id="reset-button" class="text-button" type="button">重新配對 <span aria-hidden="true">↻</span></button>
+      </div>
+      <article class="feature-food">
+        <div class="food-visual" id="hero-food-visual" role="img" aria-label=""><span id="hero-food-emoji" aria-hidden="true"></span><span class="visual-caption">A TASTE MADE FOR YOU</span></div>
+        <div class="feature-copy">
+          <p class="food-kicker">你的代表美食</p>
+          <h3 id="hero-food-name"></h3>
+          <p id="hero-food-description" class="food-description"></p>
+          <p id="story-text" class="story-text"></p>
+          <div id="trait-list" class="trait-list"></div>
+        </div>
+      </article>
+      <div class="result-columns">
+        <section class="recommendations" aria-labelledby="recommendation-title">
+          <div class="section-title"><div><p class="eyebrow">A FEW MORE TO TRY</p><h3 id="recommendation-title">也很適合你的味道</h3></div><span class="small-count">01 — 04</span></div>
+          <div id="recommendation-list" class="recommendation-list"></div>
+        </section>
+        <aside class="result-aside">
+          <section class="insight-card"><p class="eyebrow">YOUR NAME IN FLAVOR</p><h3>名字裡的線索</h3><p id="dictionary-hits"></p></section>
+          <section class="insight-card method-card" id="how-it-works"><p class="eyebrow">HOW IT WORKS</p><h3>關於這次配對</h3><p id="method-note"></p><p class="disclaimer-small">配對結果由文字意象與固定演算法產生，僅供娛樂及美食探索，不代表人格、健康或營養判斷。</p></section>
+        </aside>
+      </div>
+      <div class="share-bar">
+        <div><strong>喜歡這次的配對嗎？</strong><span>把你的名字味道分享出去。</span></div>
+        <button id="share-button" class="share-button" type="button">分享我的結果 <span aria-hidden="true">↗</span></button>
+        <p id="share-status" role="status" class="share-status"></p>
+      </div>
+    </section>
+
+    <section class="disclaimer-banner">
+      <span class="disclaimer-icon" aria-hidden="true">✳</span>
+      <p>配對結果由文字意象與固定演算法產生，僅供娛樂及美食探索，<br class="desktop-break">不代表人格、健康或營養判斷。</p>
+    </section>
+  </main>
+  <footer><span>名字的味道 · Name Your Flavor</span><span>用一點想像，配一口好味道。</span></footer>
+</body>
+</html>
