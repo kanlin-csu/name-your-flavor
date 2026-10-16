@@ -24,6 +24,15 @@ test("normalizes names and strips only trailing titles", () => {
 test("prioritizes a multi-character name match", () => {
   const hits = findNameMatches("甘霖");
   assert.deepEqual(hits.map((hit) => hit.matchedText), ["甘霖"]);
+  assert.equal(findNameMatches("銀河")[0].matchedText, "銀河");
+  assert.equal(findNameMatches("rose")[0].matchedText, "rose");
+  assert.equal(findNameMatches("arose").length, 0);
+});
+
+test("matches all user-requested name characters", () => {
+  for (const character of ["貝", "婷", "錦", "芳", "萍", "哲", "佳", "怡", "明", "倫", "荳"]) {
+    assert.ok(findNameMatches(character).some((hit) => hit.matchedText === character), `${character} should match`);
+  }
 });
 
 test("name matching is deterministic and differs across names", () => {
@@ -53,7 +62,9 @@ test("filters diet, allergens, and spice without changing the name hash", () => 
 test("food and dictionary data meet the delivery requirements", () => {
   assert.ok(FOODS.length >= 120, `expected at least 120 foods, got ${FOODS.length}`);
   assert.ok(new Set(FOODS.map((food) => food.id)).size === FOODS.length);
-  assert.ok(new Set(NAME_DICTIONARY.flatMap((entry) => entry.match)).size >= 200);
+  const keywords = NAME_DICTIONARY.flatMap((entry) => entry.match);
+  assert.ok(new Set(keywords).size >= 500);
+  assert.equal(new Set(keywords).size, keywords.length, "dictionary keywords must not be duplicated");
   for (const food of FOODS) {
     assert.ok(food.name && food.description && food.emoji);
     assert.ok(food.flavorNote && food.occasionNote);
