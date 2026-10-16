@@ -12,7 +12,8 @@ const results = document.querySelector("#results");
 const dietSelect = document.querySelector("#diet-select");
 const spicySelect = document.querySelector("#spicy-select");
 const removeTitles = document.querySelector("#remove-titles");
-const birthdayInput = document.querySelector("#birthday-input");
+const birthdayMonthInput = document.querySelector("#birthday-month");
+const birthdayDayInput = document.querySelector("#birthday-day");
 let currentResult = null;
 let currentStory = "";
 let sharedSeason = null;
@@ -40,8 +41,11 @@ function clearError() {
 }
 
 function readPreferences() {
-  const birthSeason = birthdayInput.value ? getBirthSeason(birthdayInput.value) : sharedSeason;
-  if (birthdayInput.value && !birthSeason) throw new Error("birthday-invalid");
+  const month = birthdayMonthInput.value;
+  const day = birthdayDayInput.value;
+  const hasBirthday = Boolean(month || day);
+  const birthSeason = hasBirthday ? getBirthSeason(`${month}-${day}`) : sharedSeason;
+  if (hasBirthday && !birthSeason) throw new Error("birthday-invalid");
   return {
     diet: dietSelect.value,
     spicy: spicySelect.value,
@@ -152,7 +156,7 @@ function errorText(error) {
   if (error.message === "too-long") return "名字正規化後請控制在 20 個字以內。";
   if (error.message === "invalid") return "請輸入包含文字或數字的名字，不要只使用標點符號。";
   if (error.message === "no-foods") return "目前沒有符合這些飲食條件的美食，請減少一項排除條件。";
-  if (error.message === "birthday-invalid") return "請確認出生日期有效，且不是未來日期。";
+  if (error.message === "birthday-invalid") return "請輸入有效的出生月日；例如 2 月 29 日也可以。";
   return "配對時發生問題，請調整條件後再試一次。";
 }
 
@@ -167,8 +171,13 @@ function submitMatch(event) {
     renderResult(result, preferences);
   } catch (error) {
     showError(errorText(error));
-    const invalidField = error.message === "birthday-invalid" ? birthdayInput : nameInput;
-    invalidField.setAttribute("aria-invalid", "true");
+    const invalidField = error.message === "birthday-invalid" ? (birthdayMonthInput.value ? birthdayDayInput : birthdayMonthInput) : nameInput;
+    if (error.message === "birthday-invalid") {
+      birthdayMonthInput.setAttribute("aria-invalid", "true");
+      birthdayDayInput.setAttribute("aria-invalid", "true");
+    } else {
+      nameInput.setAttribute("aria-invalid", "true");
+    }
     invalidField.focus();
   }
 }
@@ -265,7 +274,7 @@ function restoreFromUrl() {
   sharedSeason = season || null;
   if (season) {
     document.querySelector("#birthday-help").textContent =
-      `分享連結已套用${SEASON_LABELS[season]}食材；未分享完整生日。`;
+      `分享連結已套用${SEASON_LABELS[season]}食材；未分享月日或年份。`;
   }
   if (diet !== "any" || spicy !== "any" || season) document.querySelector(".preferences").open = true;
   submitMatch();
@@ -291,17 +300,14 @@ document.querySelectorAll(".example-button").forEach((button) => {
   });
 });
 nameInput.addEventListener("input", clearError);
-birthdayInput.addEventListener("input", () => {
+function handleBirthdayInput() {
   sharedSeason = null;
   clearError();
-  birthdayInput.removeAttribute("aria-invalid");
+  birthdayMonthInput.removeAttribute("aria-invalid");
+  birthdayDayInput.removeAttribute("aria-invalid");
   document.querySelector("#birthday-help").textContent =
-    "只取出生季節來搭配當季食材；生日不會保存或放入分享網址。";
-});
-const today = new Date();
-birthdayInput.max = [
-  today.getFullYear(),
-  String(today.getMonth() + 1).padStart(2, "0"),
-  String(today.getDate()).padStart(2, "0")
-].join("-");
+    "只使用月、日推算出生季節；不需要年份，也不會保存完整生日。";
+}
+birthdayMonthInput.addEventListener("input", handleBirthdayInput);
+birthdayDayInput.addEventListener("input", handleBirthdayInput);
 restoreFromUrl();

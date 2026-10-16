@@ -36,14 +36,15 @@ test("matches all user-requested name characters", () => {
   }
 });
 
-test("maps birth dates to seasons and rejects invalid or future dates", () => {
-  assert.equal(getBirthSeason("2000-03-01"), "spring");
-  assert.equal(getBirthSeason("2000-06-01"), "summer");
-  assert.equal(getBirthSeason("2000-09-01"), "autumn");
-  assert.equal(getBirthSeason("2000-12-01"), "winter");
-  assert.equal(getBirthSeason("2000-02-29"), "winter");
-  assert.equal(getBirthSeason("2001-02-29"), null);
-  assert.equal(getBirthSeason("2999-01-01"), null);
+test("maps month and day to seasons without requiring a year", () => {
+  assert.equal(getBirthSeason("3-1"), "spring");
+  assert.equal(getBirthSeason("6-1"), "summer");
+  assert.equal(getBirthSeason("9-1"), "autumn");
+  assert.equal(getBirthSeason("12-1"), "winter");
+  assert.equal(getBirthSeason("2-29"), "winter");
+  assert.equal(getBirthSeason("2-30"), null);
+  assert.equal(getBirthSeason("13-1"), null);
+  assert.equal(getBirthSeason("6-"), null);
 });
 
 test("birth season boosts matching seasonal ingredients without changing the name hash", () => {

@@ -69,7 +69,9 @@ main { width: min(1080px, calc(100% - 44px)); margin: 0 auto; }
 .preference-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; padding: 4px 0 17px; }
 .preference-control > label, .allergen-control legend { display: block; margin-bottom: 7px; font-size: 11px; font-weight: 700; }
 .preference-control select { width: 100%; min-height: 42px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: 8px; color: var(--color-text); background: white; }
-.preference-control input[type="date"] { width: 100%; min-height: 42px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: 8px; color: var(--color-text); background: white; }
+.birthday-fields { display: flex; align-items: center; gap: 8px; }
+.birthday-fields input { width: 90px; min-height: 42px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: 8px; color: var(--color-text); background: white; }
+.birthday-fields span { color: var(--color-muted); font-size: 12px; }
 .birthday-visible { margin-top: 17px; padding: 15px 16px; border: 1px solid #e5dacb; border-radius: 11px; background: #fffdfa; }
 .control-help { display: block; margin-top: 5px; color: var(--color-muted); font-size: 10px; line-height: 1.5; }
 .allergen-control { grid-column: 1 / -1; margin: 0; padding: 0; border: 0; }
