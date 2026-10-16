@@ -51,6 +51,11 @@
           <button class="clear-button" id="clear-name" type="button" aria-label="清除姓名">清除</button>
         </div>
         <p class="field-help" id="name-help">中文、英文、日文都可以，最多 20 個字。</p>
+        <div class="preference-control birthday-control birthday-visible">
+          <label for="birthday-input">出生日期（選填）</label>
+          <input id="birthday-input" type="date" autocomplete="bday" aria-describedby="birthday-help">
+          <span id="birthday-help" class="control-help">只取出生季節來搭配當季食材；生日不會保存或放入分享網址。</span>
+        </div>
         <details class="preferences">
           <summary><span>加一點偏好設定</span><span class="optional">選填</span></summary>
           <div class="preference-grid">
@@ -65,11 +70,6 @@
               <select id="spicy-select" name="spicy">
                 <option value="any">不限</option><option value="none">不辣</option><option value="mild">小辣</option><option value="hot">嗜辣</option>
               </select>
-            </div>
-            <div class="preference-control birthday-control">
-              <label for="birthday-input">出生日期（選填）</label>
-              <input id="birthday-input" type="date" autocomplete="bday" aria-describedby="birthday-help">
-              <span id="birthday-help" class="control-help">只取出生季節來搭配當季食材；生日不會保存或放入分享網址。</span>
             </div>
             <fieldset class="allergen-control">
               <legend>過敏原排除</legend>
