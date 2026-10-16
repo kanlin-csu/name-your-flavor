@@ -37,7 +37,8 @@ function clearError() {
   errorMessage.textContent = "";
   errorMessage.hidden = true;
   nameInput.removeAttribute("aria-invalid");
-  birthdayInput.removeAttribute("aria-invalid");
+  birthdayMonthInput.removeAttribute("aria-invalid");
+  birthdayDayInput.removeAttribute("aria-invalid");
 }
 
 function readPreferences() {
