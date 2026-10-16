@@ -5,6 +5,7 @@ const COLORS = {
   text: "#332820",
   muted: "#75685e",
   primary: "#b94f32",
+  secondary: "#71846b",
   accent: "#d99a3e",
   border: "#eadfd3",
   surface: "#ffffff",
@@ -103,6 +104,9 @@ export function drawResultCard(context, result, story) {
   context.fillStyle = "#8d6546";
   context.font = '400 19px "Noto Sans TC", "Microsoft JhengHei", sans-serif';
   drawWrappedText(context, story, 104, 758, 980, 31, 2);
+  context.fillStyle = COLORS.secondary;
+  context.font = '600 16px "Noto Sans TC", "Microsoft JhengHei", sans-serif';
+  context.fillText(result.seasonLabel ? `出生季節食材加權 · ${result.seasonLabel}` : "未使用出生季節食材加權", 104, 832);
 
   context.fillStyle = COLORS.primary;
   context.font = '700 21px "Noto Serif TC", "Microsoft JhengHei", serif';

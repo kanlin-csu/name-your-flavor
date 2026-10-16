@@ -1,6 +1,7 @@
 import { findNameMatches } from "./dictionary.js";
 import { FOODS } from "./foods.js";
 import { stableTieScore } from "./hash.js";
+import { SEASON_LABELS, scoreSeasonalIngredients } from "./seasonality.js";
 
 const TASTE_KEYS = ["sweet", "sour", "spicy", "savory", "bitter", "light"];
 const TEXTURE_KEYS = ["crispy", "soft", "chewy", "smooth", "juicy"];
@@ -73,9 +74,13 @@ export function scoreFood(food, profile, hash, preferences = {}) {
     profile.method, METHOD_KEYS
   );
   const profileIngredients = profile.ingredients || [];
-  const ingredientScore = profileIngredients.length
+  const nameIngredientScore = profileIngredients.length
     ? food.ingredients.filter((ingredient) => profileIngredients.includes(ingredient)).length / Math.max(profileIngredients.length, 1)
     : 0.5;
+  const seasonalIngredientScore = scoreSeasonalIngredients(food, preferences.season);
+  const ingredientScore = preferences.season
+    ? (nameIngredientScore + seasonalIngredientScore) / 2
+    : nameIngredientScore;
   const tieScore = stableTieScore(hash.cuisineHash + hash.tasteHash + hash.textureHash + hash.methodHash, food.id);
 
   return tasteScore * 0.3 + textureScore * 0.2 + cuisineScore * 0.15
@@ -135,6 +140,8 @@ export function matchName(normalizedName, hash, preferences = {}) {
     hits,
     profile,
     hash,
+    season: preferences.season || null,
+    seasonLabel: SEASON_LABELS[preferences.season] || null,
     featured: ranked[0].food,
     recommendations: recommendations.map((result) => result.food),
     traits: describeProfile(profile),

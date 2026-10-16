@@ -3,6 +3,7 @@ import { hashName } from "./hash.js";
 import { matchName } from "./matcher.js";
 import { ALLERGENS } from "./foods.js";
 import { createResultImage } from "./result-image.js";
+import { getBirthSeason, getSeasonalIngredientMatches, SEASON_LABELS, SEASON_ORDER } from "./seasonality.js";
 
 const form = document.querySelector("#match-form");
 const nameInput = document.querySelector("#name-input");
@@ -11,8 +12,10 @@ const results = document.querySelector("#results");
 const dietSelect = document.querySelector("#diet-select");
 const spicySelect = document.querySelector("#spicy-select");
 const removeTitles = document.querySelector("#remove-titles");
+const birthdayInput = document.querySelector("#birthday-input");
 let currentResult = null;
 let currentStory = "";
+let sharedSeason = null;
 const cuisineNames = {
   taiwanese: "台灣風味", japanese: "日本風味", korean: "韓國風味", thai: "泰式風味",
   chinese: "中華風味", italian: "義式風味", southeastAsian: "東南亞風味",
@@ -33,12 +36,16 @@ function clearError() {
   errorMessage.textContent = "";
   errorMessage.hidden = true;
   nameInput.removeAttribute("aria-invalid");
+  birthdayInput.removeAttribute("aria-invalid");
 }
 
 function readPreferences() {
+  const birthSeason = birthdayInput.value ? getBirthSeason(birthdayInput.value) : sharedSeason;
+  if (birthdayInput.value && !birthSeason) throw new Error("birthday-invalid");
   return {
     diet: dietSelect.value,
     spicy: spicySelect.value,
+    season: birthSeason,
     allergens: Array.from(form.querySelectorAll('input[name="allergen"]:checked'), (input) => input.value)
       .filter((allergen) => ALLERGENS.includes(allergen))
   };
@@ -101,6 +108,11 @@ function renderResult(result, preferences) {
   setText("#food-ingredients", food.ingredients.join("、"));
   setText("#food-flavor-note", food.flavorNote);
   setText("#food-occasion", food.occasionNote);
+  const seasonalMatches = result.season ? getSeasonalIngredientMatches(food, result.season) : [];
+  const seasonNote = result.season
+    ? `${result.seasonLabel}食材加權已套用。${seasonalMatches.length ? `這道料理命中：${seasonalMatches.join("、")}。` : "這道料理沒有直接命中當季食材，整體配對仍已納入季節考量。"}`
+    : "未提供出生日期，這次配對不使用季節食材加權。";
+  setText("#food-season-note", seasonNote);
   const visual = document.querySelector("#hero-food-visual");
   visual.setAttribute("aria-label", `${food.name}，食物插圖`);
   setText("#hero-food-emoji", food.emoji);
@@ -124,8 +136,11 @@ function renderResult(result, preferences) {
     : "稱謂保留在姓名中，並參與本次固定雜湊與配對。";
   const preferenceNote = preferences.diet !== "any" || preferences.spicy !== "any" || preferences.allergens.length
     ? "飲食、辣度與過敏條件只用來排除結果，不會改變姓名雜湊。"
-    : "配對以味覺相似度 30%、口感 20%、菜系 15%、料理方式 15%、食材 10% 及固定雜湊 10% 計分。";
-  setText("#method-note", `${titleNote} ${preferenceNote}`);
+    : "以味覺 30%、口感 20%、菜系 15%、料理方式 15%、食材 10% 及固定雜湊 10% 計分。";
+  const seasonNoteText = preferences.season
+    ? `出生季節（${SEASON_LABELS[preferences.season]}）會影響食材相似度，不改變姓名雜湊。`
+    : "出生季節為選填；未提供時不納入季節食材加權。";
+  setText("#method-note", `${titleNote} ${preferenceNote} ${seasonNoteText}`);
 
   results.hidden = false;
   document.querySelector("#share-status").textContent = "";
@@ -137,6 +152,7 @@ function errorText(error) {
   if (error.message === "too-long") return "名字正規化後請控制在 20 個字以內。";
   if (error.message === "invalid") return "請輸入包含文字或數字的名字，不要只使用標點符號。";
   if (error.message === "no-foods") return "目前沒有符合這些飲食條件的美食，請減少一項排除條件。";
+  if (error.message === "birthday-invalid") return "請確認出生日期有效，且不是未來日期。";
   return "配對時發生問題，請調整條件後再試一次。";
 }
 
@@ -151,7 +167,9 @@ function submitMatch(event) {
     renderResult(result, preferences);
   } catch (error) {
     showError(errorText(error));
-    nameInput.focus();
+    const invalidField = error.message === "birthday-invalid" ? birthdayInput : nameInput;
+    invalidField.setAttribute("aria-invalid", "true");
+    invalidField.focus();
   }
 }
 
@@ -179,6 +197,7 @@ async function shareResult() {
   url.searchParams.set("name", normalizedName);
   url.searchParams.set("diet", dietSelect.value);
   url.searchParams.set("spicy", spicySelect.value);
+  if (currentResult?.season) url.searchParams.set("season", currentResult.season);
   url.searchParams.set("v", "1");
   const shareData = { title: "名字的味道 Name Your Flavor", text: `${normalizedName}的代表美食`, url: url.href };
   try {
@@ -235,14 +254,20 @@ function restoreFromUrl() {
   const spicyLevels = ["any", "none", "mild", "hot"];
   const diet = params.get("diet") || "any";
   const spicy = params.get("spicy") || "any";
-  if (!diets.includes(diet) || !spicyLevels.includes(spicy)) {
+  const season = params.get("season");
+  if (!diets.includes(diet) || !spicyLevels.includes(spicy) || (season && !SEASON_ORDER.includes(season))) {
     showError("分享網址中的偏好設定無效，請重新輸入名字。");
     return;
   }
   nameInput.value = rawName;
   dietSelect.value = diet;
   spicySelect.value = spicy;
-  if (diet !== "any" || spicy !== "any") document.querySelector(".preferences").open = true;
+  sharedSeason = season || null;
+  if (season) {
+    document.querySelector("#birthday-help").textContent =
+      `分享連結已套用${SEASON_LABELS[season]}食材；未分享完整生日。`;
+  }
+  if (diet !== "any" || spicy !== "any" || season) document.querySelector(".preferences").open = true;
   submitMatch();
 }
 
@@ -266,4 +291,17 @@ document.querySelectorAll(".example-button").forEach((button) => {
   });
 });
 nameInput.addEventListener("input", clearError);
+birthdayInput.addEventListener("input", () => {
+  sharedSeason = null;
+  clearError();
+  birthdayInput.removeAttribute("aria-invalid");
+  document.querySelector("#birthday-help").textContent =
+    "只取出生季節來搭配當季食材；生日不會保存或放入分享網址。";
+});
+const today = new Date();
+birthdayInput.max = [
+  today.getFullYear(),
+  String(today.getMonth() + 1).padStart(2, "0"),
+  String(today.getDate()).padStart(2, "0")
+].join("-");
 restoreFromUrl();

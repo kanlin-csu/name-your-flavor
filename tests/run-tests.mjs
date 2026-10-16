@@ -4,6 +4,7 @@ import { FOODS, ALLERGENS } from "../js/foods.js";
 import { hashName } from "../js/hash.js";
 import { matchName } from "../js/matcher.js";
 import { drawResultCard } from "../js/result-image.js";
+import { getBirthSeason, getSeasonalIngredientMatches, scoreSeasonalIngredients } from "../js/seasonality.js";
 
 const tests = [];
 function test(name, run) {
@@ -35,6 +36,30 @@ test("matches all user-requested name characters", () => {
   }
 });
 
+test("maps birth dates to seasons and rejects invalid or future dates", () => {
+  assert.equal(getBirthSeason("2000-03-01"), "spring");
+  assert.equal(getBirthSeason("2000-06-01"), "summer");
+  assert.equal(getBirthSeason("2000-09-01"), "autumn");
+  assert.equal(getBirthSeason("2000-12-01"), "winter");
+  assert.equal(getBirthSeason("2000-02-29"), "winter");
+  assert.equal(getBirthSeason("2001-02-29"), null);
+  assert.equal(getBirthSeason("2999-01-01"), null);
+});
+
+test("birth season boosts matching seasonal ingredients without changing the name hash", () => {
+  const hash = hashName("甘霖");
+  const base = matchName("甘霖", hash);
+  const spring = matchName("甘霖", hash, { season: "spring" });
+  const springDish = spring.ranked.find((item) => item.food.id === "spring-bamboo-rice");
+  const otherSeasonDish = spring.ranked.find((item) => item.food.id === "winter-daikon-pot");
+  assert.equal(spring.season, "spring");
+  assert.equal(hash.cuisineHash, base.hash.cuisineHash);
+  assert.ok(scoreSeasonalIngredients(springDish.food, "spring") > scoreSeasonalIngredients(springDish.food, "winter"));
+  assert.ok(springDish.score > base.ranked.find((item) => item.food.id === "spring-bamboo-rice").score);
+  assert.ok(otherSeasonDish.score >= base.ranked.find((item) => item.food.id === "winter-daikon-pot").score);
+  assert.ok(getSeasonalIngredientMatches(springDish.food, "spring").includes("竹筍"));
+});
+
 test("name matching is deterministic and differs across names", () => {
   const one = matchName("甘霖", hashName("甘霖"));
   const repeat = matchName("甘霖", hashName("甘霖"));
@@ -60,7 +85,7 @@ test("filters diet, allergens, and spice without changing the name hash", () => 
 });
 
 test("food and dictionary data meet the delivery requirements", () => {
-  assert.ok(FOODS.length >= 120, `expected at least 120 foods, got ${FOODS.length}`);
+  assert.ok(FOODS.length >= 160, `expected at least 160 foods, got ${FOODS.length}`);
   assert.ok(new Set(FOODS.map((food) => food.id)).size === FOODS.length);
   const keywords = NAME_DICTIONARY.flatMap((entry) => entry.match);
   assert.ok(new Set(keywords).size >= 500);

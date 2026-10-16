@@ -178,7 +178,31 @@ const rows = [
   ["black-sesame-soup", "黑芝麻糊", "🥣", "chinese", "甜點", "sweet", "smooth", "stew", "黑芝麻,糯米,冰糖", "sesame", "vegan", 0],
   ["peanut-mochi", "花生麻糬", "🥜", "taiwanese", "甜點", "sweet", "chewy", "steam", "糯米,花生,芝麻", "peanuts,sesame", "vegan", 0],
   ["lemon-olive-pasta", "檸檬橄欖油細麵", "🍝", "italian", "麵飯", "sour", "chewy", "steam", "義大利麵,檸檬,橄欖油,香草", "wheat", "vegan", 0],
-  ["grilled-vegetable-skewers", "香草烤蔬菜串", "🍢", "mediterranean", "素食", "savory", "juicy", "grill", "甜椒,櫛瓜,洋蔥,迷迭香", "", "vegan", 0]
+  ["grilled-vegetable-skewers", "香草烤蔬菜串", "🍢", "mediterranean", "素食", "savory", "juicy", "grill", "甜椒,櫛瓜,洋蔥,迷迭香", "", "vegan", 0],
+  ["spring-asparagus-risotto", "蘆筍檸香燉飯", "🍚", "italian", "麵飯", "light", "smooth", "stew", "蘆筍,米,檸檬,起司", "milk", "vegetarian", 0],
+  ["spring-bamboo-rice", "春筍香菇炊飯", "🍚", "taiwanese", "麵飯", "umami", "soft", "steam", "春筍,香菇,米,醬油", "soy", "vegan", 0],
+  ["spring-pea-soup", "青豆薄荷濃湯", "🥣", "western", "湯品", "light", "smooth", "stew", "豌豆,薄荷,馬鈴薯,高湯", "", "vegan", 0],
+  ["spring-strawberry-salad", "草莓菠菜堅果沙拉", "🥗", "western", "素食", "sour", "crispy", "raw", "草莓,菠菜,核桃,生菜", "tree-nuts", "vegan", 0],
+  ["spring-bamboo-soup", "春筍豆腐清湯", "🍲", "chinese", "湯品", "light", "soft", "stew", "春筍,豆腐,香菇,薑", "soy", "vegan", 0],
+  ["spring-cherry-tart", "櫻桃杏仁塔", "🥧", "western", "甜點", "sweet", "crispy", "bake", "櫻桃,杏仁,麵粉,奶油", "tree-nuts,wheat,milk", "vegetarian", 0],
+  ["summer-watermelon-salad", "西瓜薄荷沙拉", "🍉", "mediterranean", "素食", "light", "juicy", "raw", "西瓜,薄荷,檸檬,起司", "milk", "vegetarian", 0],
+  ["summer-cucumber-noodles", "胡麻小黃瓜冷麵", "🥒", "japanese", "麵飯", "light", "chewy", "raw", "小黃瓜,蕎麥,芝麻,醬油", "sesame,soy", "vegan", 0],
+  ["summer-corn-chowder", "夏日玉米濃湯", "🌽", "western", "湯品", "sweet", "smooth", "stew", "玉米,馬鈴薯,牛奶,洋蔥", "milk", "vegetarian", 0],
+  ["summer-eggplant-basil", "九層塔燒茄子", "🍆", "taiwanese", "家常", "savory", "soft", "stew", "茄子,九層塔,番茄,醬油", "soy", "vegan", 0],
+  ["summer-lychee-jelly", "荔枝桂花果凍", "🍮", "taiwanese", "甜點", "sweet", "smooth", "stew", "荔枝,桂花,寒天", "", "vegan", 0],
+  ["summer-passionfruit-sorbet", "百香果鳳梨雪酪", "🍧", "taiwanese", "甜點", "sour", "smooth", "raw", "百香果,鳳梨,檸檬", "", "vegan", 0],
+  ["autumn-pumpkin-risotto", "栗香南瓜燉飯", "🍚", "italian", "麵飯", "sweet", "smooth", "stew", "南瓜,栗子,米,起司", "milk,tree-nuts", "vegetarian", 0],
+  ["autumn-chestnut-rice", "栗子香菇炊飯", "🍚", "japanese", "麵飯", "umami", "soft", "steam", "栗子,香菇,米,醬油", "soy,tree-nuts", "vegan", 0],
+  ["autumn-pear-tart", "焦糖梨子塔", "🥧", "western", "甜點", "sweet", "crispy", "bake", "梨子,麵粉,奶油,肉桂", "wheat,milk", "vegetarian", 0],
+  ["autumn-persimmon-salad", "柿子芝麻葉沙拉", "🥗", "mediterranean", "素食", "light", "juicy", "raw", "柿子,芝麻葉,核桃,橄欖油", "tree-nuts", "vegan", 0],
+  ["autumn-taro-soup", "芋頭紅豆暖心湯", "🥣", "taiwanese", "甜點", "sweet", "smooth", "stew", "芋頭,紅豆,桂花", "", "vegan", 0],
+  ["autumn-sweet-potato-bake", "地瓜蘋果烤盅", "🍠", "western", "點心", "sweet", "soft", "bake", "地瓜,蘋果,燕麥,肉桂", "", "vegan", 0],
+  ["winter-daikon-pot", "薑香白蘿蔔蔬菜鍋", "🍲", "taiwanese", "湯品", "light", "soft", "stew", "白蘿蔔,白菜,薑,豆腐", "soy", "vegan", 0],
+  ["winter-citrus-salad", "柑橘茴香沙拉", "🍊", "mediterranean", "素食", "sour", "crispy", "raw", "柑橘,茴香,生菜,橄欖油", "", "vegan", 0],
+  ["winter-cabbage-rolls", "高麗菜香菇豆腐捲", "🥬", "chinese", "家常", "umami", "soft", "steam", "高麗菜,香菇,豆腐,薑", "soy", "vegan", 0],
+  ["winter-ginger-sesame-tofu", "薑汁麻油煎豆腐", "🧈", "taiwanese", "家常", "savory", "crispy", "fry", "豆腐,薑,麻油,青蔥", "soy,sesame", "vegan", 0],
+  ["winter-red-date-tea", "桂圓紅棗暖茶", "🫖", "chinese", "飲品", "sweet", "smooth", "stew", "紅棗,桂圓,薑,枸杞", "", "vegan", 0],
+  ["winter-citrus-cake", "蜜柑橄欖油蛋糕", "🍊", "italian", "甜點", "sweet", "soft", "bake", "柑橘,麵粉,橄欖油,雞蛋", "wheat,eggs", "vegetarian", 0]
 ];
 
 const parseList = (value) => value ? value.split(",") : [];
